@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zoiee Assistant</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        .chat-card { width: 360px; height: 580px; background: white; border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* Dark blue header like image */
+        .header-bar { background: #000428; height: 45px; display: flex; align-items: center; justify-content: flex-end; padding: 0 15px; color: white; gap: 12px; }
+        
+        /* Teal disclaimer box */
+        .disclaimer { background: #e0f7f9; padding: 12px; font-size: 11px; color: #004d40; border: 1px solid #b2dfdb; margin: 10px; border-radius: 4px; line-height: 1.4; }
+        
+        .chat-box { flex: 1; padding: 15px; overflow-y: auto; background: #f9f9fb; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* Message Bubbles */
+        .msg { padding: 10px 14px; border-radius: 4px; font-size: 13.5px; max-width: 85%; }
+        .bot { background: #000839; color: white; align-self: flex-start; }
+        .user { background: white; color: #333; align-self: flex-end; border: 1px solid #ddd; }
+        
+        .footer { display: flex; padding: 12px; border-top: 1px solid #eee; background: white; align-items: center; }
+        input { flex: 1; border: none; outline: none; font-size: 14px; }
+        button { background: none; border: none; color: #000839; font-size: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="chat-card">
+    <div class="header-bar"><span>⚙️</span><span>—</span><span>✖</span></div>
+    <div class="disclaimer">
+        Digital Assistant strives for accuracy but is still learning. Please use discretion. Avoid entering personal information.
+    </div>
+    <div class="chat-box" id="chatBox">
+        <div class="msg bot">Welcome! How may I assist you today?</div>
+    </div>
+    <div class="footer">
+        <input type="text" id="userInput" placeholder="Ask Zoiee..." onkeypress="if(event.key === 'Enter') askAI()">
+        <button onclick="askAI()">➤</button>
+    </div>
+</div>
+
+<script>
+    async function askAI() {
+        const input = document.getElementById('userInput');
+        const box = document.getElementById('chatBox');
+        if (!input.value.trim()) return;
+
+        // Add user message
+        box.innerHTML += `<div class="msg user">${input.value}</div>`;
+        const userText = input.value;
+        input.value = '';
+        box.scrollTop = box.scrollHeight;
+
+        try {
+            const response = await fetch('http://localhost:3000/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: userText })
+            });
+            const data = await response.json();
+            box.innerHTML += `<div class="msg bot">${data.reply}</div>`;
+            box.scrollTop = box.scrollHeight;
+        } catch (err) {
+            box.innerHTML += `<div class="msg bot">Error: Check if server.js is running.</div>`;
+        }
+    }
+</script>
+</body>
+</html>
